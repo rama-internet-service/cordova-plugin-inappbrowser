@@ -83,8 +83,17 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
+// ZANICHELLI
+import android.content.res.Configuration;
+import android.util.Log;
+import android.widget.Toast;
+
+
 @SuppressLint("SetJavaScriptEnabled")
 public class InAppBrowser extends CordovaPlugin {
+    // ZANICHELLI
+    private ImageView imageview;
+    private RelativeLayout toolbar;
 
     private static final String NULL = "null";
     protected static final String LOG_TAG = "InAppBrowser";
@@ -147,6 +156,19 @@ public class InAppBrowser extends CordovaPlugin {
     private boolean fullscreen = true;
     private String[] allowedSchemes;
     private InAppBrowserClient currentClient;
+
+    // ZANICHELLI
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            toolbar.setVisibility(View.GONE);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            toolbar.setVisibility(View.VISIBLE);
+        }
+    }
 
     /**
      * Executes the request and returns PluginResult.
@@ -796,10 +818,16 @@ public class InAppBrowser extends CordovaPlugin {
                 main.setOrientation(LinearLayout.VERTICAL);
 
                 // Toolbar layout
-                RelativeLayout toolbar = new RelativeLayout(cordova.getActivity());
+                // ZANICHELLI
+                // RelativeLayout toolbar = new RelativeLayout(cordova.getActivity());
+                toolbar = new RelativeLayout(cordova.getActivity());
+
                 //Please, no more black!
                 toolbar.setBackgroundColor(toolbarColor);
-                toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(44)));
+                // toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(44)));
+                // ZANICHELLI
+                toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(60)));
+
                 toolbar.setPadding(this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2));
                 if (leftToRight) {
                     toolbar.setHorizontalGravity(Gravity.LEFT);
@@ -862,6 +890,20 @@ public class InAppBrowser extends CordovaPlugin {
                         goForward();
                     }
                 });
+// ZANICHELLI
+                imageview = new ImageView(cordova.getActivity());
+                RelativeLayout.LayoutParams imageviewLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                imageviewLayoutParams.addRule(RelativeLayout.RIGHT_OF, 1);
+                imageviewLayoutParams.addRule(RelativeLayout.LEFT_OF, 5);
+                imageviewLayoutParams.setMargins(135, 0, 135, 0);
+                imageview.setLayoutParams(imageviewLayoutParams);
+                imageview.setId(Integer.valueOf(7));
+                int headerResId = activityRes.getIdentifier("header", "drawable", cordova.getActivity().getPackageName());
+                Drawable headerResImg = activityRes.getDrawable(headerResId);
+                imageview.setImageDrawable(headerResImg);
+                imageview.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                if (Build.VERSION.SDK_INT >= 16)
+                    imageview.getAdjustViewBounds();
 
                 // Edit Text Box
                 edittext = new EditText(cordova.getActivity());
@@ -890,7 +932,9 @@ public class InAppBrowser extends CordovaPlugin {
                 // Header Close/Done button
                 int closeButtonId = leftToRight ? 1 : 5;
                 View close = createCloseButton(closeButtonId);
-                toolbar.addView(close);
+                //  toolbar.addView(close);
+                // ZANICHELLI
+                toolbar.addView(imageview);
 
                 // Footer
                 RelativeLayout footer = new RelativeLayout(cordova.getActivity());
@@ -1007,8 +1051,8 @@ public class InAppBrowser extends CordovaPlugin {
                 actionButtonContainer.addView(forward);
 
                 // Add the views to our toolbar if they haven't been disabled
-                if (!hideNavigationButtons) toolbar.addView(actionButtonContainer);
-                if (!hideUrlBar) toolbar.addView(edittext);
+                // if (!hideNavigationButtons) toolbar.addView(actionButtonContainer);
+                // if (!hideUrlBar) toolbar.addView(edittext);
 
                 // Don't add the toolbar if its been disabled
                 if (getShowLocationBar()) {

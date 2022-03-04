@@ -778,12 +778,9 @@ public class InAppBrowser extends CordovaPlugin {
                     _close = close;
                 }
 
-                // RelativeLayout.LayoutParams closeLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-                //ZANICHELLI
-                RelativeLayout.LayoutParams closeLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-                // if (leftToRight) closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                // else closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                closeLayoutParams.addRule(RelativeLayout.ALIGN_LEFT);
+                RelativeLayout.LayoutParams closeLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+                if (leftToRight) closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                else closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 _close.setLayoutParams(closeLayoutParams);
                 _close.setBackground(null);
 
@@ -829,7 +826,7 @@ public class InAppBrowser extends CordovaPlugin {
                 toolbar.setBackgroundColor(toolbarColor);
                 // toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(44)));
                 // ZANICHELLI
-                toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(50)));
+                toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(60)));
 
                 toolbar.setPadding(this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2));
                 if (leftToRight) {
@@ -898,13 +895,13 @@ public class InAppBrowser extends CordovaPlugin {
                 RelativeLayout.LayoutParams imageviewLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                 imageviewLayoutParams.addRule(RelativeLayout.RIGHT_OF, 1);
                 imageviewLayoutParams.addRule(RelativeLayout.LEFT_OF, 5);
-                imageviewLayoutParams.setMargins(35, 0, 135, 0);
+                imageviewLayoutParams.setMargins(135, 0, 135, 0);
                 imageview.setLayoutParams(imageviewLayoutParams);
                 imageview.setId(Integer.valueOf(7));
                 int headerResId = activityRes.getIdentifier("header", "drawable", cordova.getActivity().getPackageName());
                 Drawable headerResImg = activityRes.getDrawable(headerResId);
                 imageview.setImageDrawable(headerResImg);
-                imageview.setScaleType(ImageView.ScaleType.FIT_START);
+                imageview.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 if (Build.VERSION.SDK_INT >= 16)
                     imageview.getAdjustViewBounds();
 
@@ -933,14 +930,11 @@ public class InAppBrowser extends CordovaPlugin {
 
 
                 // Header Close/Done button
-                // int closeButtonId = leftToRight ? 1 : 5;
-                int closeButtonId = leftToRight ? 5 : 1;
+                int closeButtonId = leftToRight ? 1 : 5;
                 View close = createCloseButton(closeButtonId);
                 //  toolbar.addView(close);
-                // ZANICHELLI                
-                //toolbar.addView(imageview);
-                actionButtonContainer.addView(close);
-                actionButtonContainer.addView(imageview);
+                // ZANICHELLI
+                toolbar.addView(imageview);
 
                 // Footer
                 RelativeLayout footer = new RelativeLayout(cordova.getActivity());
@@ -1053,11 +1047,8 @@ public class InAppBrowser extends CordovaPlugin {
                 inAppWebView.requestFocusFromTouch();
 
                 // Add the back and forward buttons to our action button container layout
-                // actionButtonContainer.addView(back);
-                // actionButtonContainer.addView(forward);
-
-                //ZANICHELLI
-                toolbar.addView(actionButtonContainer);
+                actionButtonContainer.addView(back);
+                actionButtonContainer.addView(forward);
 
                 // Add the views to our toolbar if they haven't been disabled
                 // if (!hideNavigationButtons) toolbar.addView(actionButtonContainer);

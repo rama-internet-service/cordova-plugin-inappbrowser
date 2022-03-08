@@ -36,7 +36,7 @@
 
 #define    IAB_BRIDGE_NAME @"cordova_iab"
 
-#define    TOOLBAR_HEIGHT 44.0
+#define    TOOLBAR_HEIGHT 90.6
 #define    LOCATIONBAR_HEIGHT 21.0
 #define    FOOTER_HEIGHT ((TOOLBAR_HEIGHT) + (LOCATIONBAR_HEIGHT))
 
@@ -539,9 +539,8 @@ static CDVWKInAppBrowser* instance = nil;
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
     }
     
-    //if is an app store, tel, sms, mailto or geo link, let the system handle it, otherwise it fails to load it
-    NSArray * allowedSchemes = @[@"itms-appss", @"itms-apps", @"tel", @"sms", @"mailto", @"geo"];
-    if ([allowedSchemes containsObject:[url scheme]]) {
+    //if is an app store link, let the system handle it, otherwise it fails to load it
+    if ([[ url scheme] isEqualToString:@"itms-appss"] || [[ url scheme] isEqualToString:@"itms-apps"]) {
         [theWebView stopLoading];
         [self openInSystem:url];
         shouldStart = NO;
@@ -728,6 +727,7 @@ BOOL isExiting = FALSE;
     
     CGRect webViewBounds = self.view.bounds;
     BOOL toolbarIsAtBottom = ![_browserOptions.toolbarposition isEqualToString:kInAppBrowserToolbarBarPositionTop];
+    toolbarIsAtBottom = NO;
     webViewBounds.size.height -= _browserOptions.location ? FOOTER_HEIGHT : TOOLBAR_HEIGHT;
     WKUserContentController* userContentController = [[WKUserContentController alloc] init];
     
@@ -833,20 +833,40 @@ BOOL isExiting = FALSE;
     self.toolbar.alpha = 1.000;
     self.toolbar.autoresizesSubviews = YES;
     self.toolbar.autoresizingMask = toolbarIsAtBottom ? (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin) : UIViewAutoresizingFlexibleWidth;
-    self.toolbar.barStyle = UIBarStyleBlackOpaque;
+    self.toolbar.barStyle = UIBarStyleDefault;
     self.toolbar.clearsContextBeforeDrawing = NO;
     self.toolbar.clipsToBounds = NO;
     self.toolbar.contentMode = UIViewContentModeScaleToFill;
     self.toolbar.hidden = NO;
     self.toolbar.multipleTouchEnabled = NO;
-    self.toolbar.opaque = NO;
+    self.toolbar.opaque = YES;
     self.toolbar.userInteractionEnabled = YES;
+    //MIRCO
     if (_browserOptions.toolbarcolor != nil) { // Set toolbar color if user sets it in options
       self.toolbar.barTintColor = [self colorFromHexString:_browserOptions.toolbarcolor];
     }
+    //self.toolbar.backgroundColor = [self colorFromHexString:@"#CF2C1D"];
+    
+    self.toolbar.barTintColor = [self colorFromHexString:@"#E30000"];
     if (!_browserOptions.toolbartranslucent) { // Set toolbar translucent to no if user sets it in options
       self.toolbar.translucent = NO;
     }
+    
+    //MIRCO
+    UIImageView* testataImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo-zanichelli.png"]];
+    //testataImageView.center = CGPointMake(self.view.bounds.size.width/2, 20);
+    testataImageView.center = CGPointMake(self.view.bounds.size.width/2, 66.6);
+    testataImageView.tag = 8;
+    [self.toolbar addSubview:testataImageView];
+    UIButton* backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [backButton setImage:[UIImage imageNamed:@"back.png"] forState:UIControlStateNormal];
+    [backButton addTarget:self
+                   action:@selector(goBack:)
+              forControlEvents:UIControlEventTouchUpInside];
+    [backButton setTitle:@"" forState:UIControlStateNormal];
+    //backButton.frame = CGRectMake(0.0, 16.0, 24.0, 24.0);
+    backButton.frame = CGRectMake(0.0, 52.6, 24.0, 24.0);
+    [self.toolbar addSubview:backButton];
     
     CGFloat labelInset = 5.0;
     float locationBarY = toolbarIsAtBottom ? self.view.bounds.size.height - FOOTER_HEIGHT : self.view.bounds.size.height - LOCATIONBAR_HEIGHT;
@@ -910,6 +930,7 @@ BOOL isExiting = FALSE;
     }
     
     self.view.backgroundColor = [UIColor clearColor];
+    
     [self.view addSubview:self.toolbar];
     [self.view addSubview:self.addressLabel];
     [self.view addSubview:self.spinner];
@@ -929,6 +950,8 @@ BOOL isExiting = FALSE;
 {
     // the advantage of using UIBarButtonSystemItemDone is the system will localize it for you automatically
     // but, if you want to set this yourself, knock yourself out (we can't set the title for a system Done button, so we have to create a new one)
+    //MIRCO
+    title =@"";
     self.closeButton = nil;
     // Initialize with title if title is set, otherwise the title will be 'Done' localized
     self.closeButton = title != nil ? [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStyleBordered target:self action:@selector(close)] : [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(close)];
@@ -998,7 +1021,8 @@ BOOL isExiting = FALSE;
     CGRect locationbarFrame = self.addressLabel.frame;
     
     BOOL locationbarVisible = !self.addressLabel.hidden;
-    
+    //MIRCO
+    show = YES;
     // prevent double show/hide
     if (show == !(self.toolbar.hidden)) {
         return;
@@ -1029,6 +1053,7 @@ BOOL isExiting = FALSE;
         } else {
             toolbarFrame.origin.y = (webViewBounds.size.height + LOCATIONBAR_HEIGHT);
         }
+        
         [self setWebViewFrame:webViewBounds];
         
     } else {
@@ -1051,6 +1076,15 @@ BOOL isExiting = FALSE;
             [self setWebViewFrame:self.view.bounds];
         }
     }
+}
+
+-(void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
+    //MIRCO
+    UIImageView* testataImageView = [self.toolbar viewWithTag:8];
+    //testataImageView.center = CGPointMake(self.view.bounds.size.width/2, 20);
+    testataImageView.center = CGPointMake(self.view.bounds.size.width/2, 66.6);
+    testataImageView.tag = 8;
+    [self.toolbar addSubview:testataImageView];
 }
 
 - (void)viewDidLoad
@@ -1079,12 +1113,12 @@ BOOL isExiting = FALSE;
             return UIStatusBarStyleDefault;
         }
     } else {
-        return UIStatusBarStyleDefault;
+        return UIStatusBarStyleDarkContent;
     }
 }
 
 - (BOOL)prefersStatusBarHidden {
-    return NO;
+    return YES;
 }
 
 - (void)close
@@ -1153,11 +1187,26 @@ BOOL isExiting = FALSE;
     viewBounds.size.height = viewBounds.size.height - statusBarHeight + lastReducedStatusBarHeight;
     lastReducedStatusBarHeight = statusBarHeight;
     
-    if ((_browserOptions.toolbar) && ([_browserOptions.toolbarposition isEqualToString:kInAppBrowserToolbarBarPositionTop])) {
+    //MIRCO
+    //if ((_browserOptions.toolbar) && ([_browserOptions.toolbarposition isEqualToString:kInAppBrowserToolbarBarPositionTop])) {
         // if we have to display the toolbar on top of the web view, we need to account for its height
+    //self.toolbar.frame = CGRectNull;
+    //self.toolbar.frame = CGRectMake(self.toolbar.frame.origin.x, statusBarHeight, self.toolbar.frame.size.width, self.toolbar.frame.size.height);
+    
+    if (UIDeviceOrientationIsPortrait([UIDevice currentDevice].orientation)){
+        // code for Portrait orientation
         viewBounds.origin.y += TOOLBAR_HEIGHT;
         self.toolbar.frame = CGRectMake(self.toolbar.frame.origin.x, statusBarHeight, self.toolbar.frame.size.width, self.toolbar.frame.size.height);
+    } else {
+        self.toolbar.frame = CGRectMake(self.toolbar.frame.origin.x, -100, self.toolbar.frame.size.width, self.toolbar.frame.size.height);
     }
+    
+    //}
+    //self.toolbar.backgroundColor = UIColor.clearColor;
+    
+//    UIView *statusBar = [[UIView alloc]initWithFrame:[UIApplication sharedApplication].keyWindow.windowScene.statusBarManager.statusBarFrame] ;
+//    statusBar.backgroundColor = [UIColor greenColor];
+//    [[UIApplication sharedApplication].keyWindow addSubview:statusBar];
     
     self.webView.frame = viewBounds;
 }

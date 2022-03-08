@@ -844,10 +844,11 @@ BOOL isExiting = FALSE;
     //MIRCO
     if (_browserOptions.toolbarcolor != nil) { // Set toolbar color if user sets it in options
       self.toolbar.barTintColor = [self colorFromHexString:_browserOptions.toolbarcolor];
+    } else {
+      self.toolbar.barTintColor = [self colorFromHexString:@"#E30000"];
     }
     //self.toolbar.backgroundColor = [self colorFromHexString:@"#CF2C1D"];
     
-    self.toolbar.barTintColor = [self colorFromHexString:@"#E30000"];
     if (!_browserOptions.toolbartranslucent) { // Set toolbar translucent to no if user sets it in options
       self.toolbar.translucent = NO;
     }

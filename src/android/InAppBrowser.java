@@ -898,7 +898,8 @@ public class InAppBrowser extends CordovaPlugin {
                 RelativeLayout.LayoutParams imageviewLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                 imageviewLayoutParams.addRule(RelativeLayout.RIGHT_OF, 1);
                 imageviewLayoutParams.addRule(RelativeLayout.LEFT_OF, 5);
-                imageviewLayoutParams.setMargins(35, 0, 135, 0);
+                // imageviewLayoutParams.setMargins(35, 0, 135, 0);
+                imageviewLayoutParams.setMargins(135, 0, 135, 0);
                 imageview.setLayoutParams(imageviewLayoutParams);
                 imageview.setId(Integer.valueOf(7));
                 int headerResId = activityRes.getIdentifier("header", "drawable", cordova.getActivity().getPackageName());
@@ -931,16 +932,16 @@ public class InAppBrowser extends CordovaPlugin {
                     }
                 });
 
-
                 // Header Close/Done button
                 // int closeButtonId = leftToRight ? 1 : 5;
                 int closeButtonId = leftToRight ? 5 : 1;
                 View close = createCloseButton(closeButtonId);
                 //  toolbar.addView(close);
-                // ZANICHELLI                
-                //toolbar.addView(imageview);
-                actionButtonContainer.addView(close);
-                actionButtonContainer.addView(imageview);
+                // ZANICHELLI - VERSIONE SENZA PULSANTE BACK/CHIUDI
+                 toolbar.addView(imageview);
+                // ZANICHELLI - VERSIONE COL PULSANTE BACK/CHIUDI
+                // actionButtonContainer.addView(close);
+                // actionButtonContainer.addView(imageview);
 
                 // Footer
                 RelativeLayout footer = new RelativeLayout(cordova.getActivity());
@@ -1057,7 +1058,7 @@ public class InAppBrowser extends CordovaPlugin {
                 // actionButtonContainer.addView(forward);
 
                 //ZANICHELLI
-                toolbar.addView(actionButtonContainer);
+                //toolbar.addView(actionButtonContainer);
 
                 // Add the views to our toolbar if they haven't been disabled
                 // if (!hideNavigationButtons) toolbar.addView(actionButtonContainer);

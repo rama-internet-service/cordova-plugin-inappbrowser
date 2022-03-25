@@ -857,6 +857,7 @@ BOOL isExiting = FALSE;
     self.toolbar.multipleTouchEnabled = NO;
     self.toolbar.opaque = YES;
     self.toolbar.userInteractionEnabled = YES;
+    self.toolbar.translucent = NO;
     //MIRCO
     if (_browserOptions.toolbarcolor != nil) { // Set toolbar color if user sets it in options
       self.toolbar.barTintColor = [self colorFromHexString:_browserOptions.toolbarcolor];

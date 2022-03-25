@@ -51,6 +51,8 @@
 
 static CDVWKInAppBrowser* instance = nil;
 
+    
+
 + (id) getInstance{
     return instance;
 }
@@ -700,6 +702,8 @@ static CDVWKInAppBrowser* instance = nil;
 @synthesize currentURL;
 
 CGFloat lastReducedStatusBarHeight = 0.0;
+//MIRCO
+BOOL lastOrientationPortrait = TRUE;
 BOOL isExiting = FALSE;
 
 - (id)initWithBrowserOptions: (CDVInAppBrowserOptions*) browserOptions andSettings:(NSDictionary *)settings
@@ -721,9 +725,21 @@ BOOL isExiting = FALSE;
     //NSLog(@"dealloc");
 }
 
+- (BOOL)hasDeviceNotch
+{
+    float iPhoneXCorrection=0.0;
+    if (@available(iOS 11.0, *)){
+            iPhoneXCorrection=[UIApplication sharedApplication].delegate.window.safeAreaInsets.top;
+            // or your code and you could use your keyWindow rather than delegate.window
+    }
+    if (iPhoneXCorrection > 0) return TRUE;
+    return FALSE;
+}
+
 - (void)createViews
 {
     // We create the views in code for primarily for ease of upgrades and not requiring an external .xib to be included
+    int NOTCH = [self hasDeviceNotch] ? 0 : 30;
     
     CGRect webViewBounds = self.view.bounds;
     BOOL toolbarIsAtBottom = ![_browserOptions.toolbarposition isEqualToString:kInAppBrowserToolbarBarPositionTop];
@@ -845,10 +861,11 @@ BOOL isExiting = FALSE;
     if (_browserOptions.toolbarcolor != nil) { // Set toolbar color if user sets it in options
       self.toolbar.barTintColor = [self colorFromHexString:_browserOptions.toolbarcolor];
     } else {
-      self.toolbar.barTintColor = [self colorFromHexString:@"#E30000"];
+        self.toolbar.barTintColor = [self colorFromHexString:@"#DF0024"];
     }
     //self.toolbar.backgroundColor = [self colorFromHexString:@"#CF2C1D"];
     
+    // self.toolbar.barTintColor = [self colorFromHexString:@"#E30000"];
     if (!_browserOptions.toolbartranslucent) { // Set toolbar translucent to no if user sets it in options
       self.toolbar.translucent = NO;
     }
@@ -856,7 +873,7 @@ BOOL isExiting = FALSE;
     //MIRCO
     UIImageView* testataImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo-zanichelli.png"]];
     //testataImageView.center = CGPointMake(self.view.bounds.size.width/2, 20);
-    testataImageView.center = CGPointMake(self.view.bounds.size.width/2, 66.6);
+    testataImageView.center = CGPointMake(self.view.bounds.size.width/2, 66.6 - (NOTCH));
     testataImageView.tag = 8;
     [self.toolbar addSubview:testataImageView];
     UIButton* backButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -866,7 +883,7 @@ BOOL isExiting = FALSE;
               forControlEvents:UIControlEventTouchUpInside];
     [backButton setTitle:@"" forState:UIControlStateNormal];
     //backButton.frame = CGRectMake(0.0, 16.0, 24.0, 24.0);
-    backButton.frame = CGRectMake(0.0, 52.6, 24.0, 24.0);
+    backButton.frame = CGRectMake(0.0, 52.6 - NOTCH, 24.0, 24.0);
     [self.toolbar addSubview:backButton];
     
     CGFloat labelInset = 5.0;
@@ -1179,6 +1196,7 @@ BOOL isExiting = FALSE;
 - (void) rePositionViews {
     CGRect viewBounds = [self.webView bounds];
     CGFloat statusBarHeight = [self getStatusBarOffset];
+    int NOTCH = [self hasDeviceNotch] ? 0 : 30;
     
     // orientation portrait or portraitUpsideDown: status bar is on the top and web view is to be aligned to the bottom of the status bar
     // orientation landscapeLeft or landscapeRight: status bar height is 0 in but lets account for it in case things ever change in the future
@@ -1196,10 +1214,17 @@ BOOL isExiting = FALSE;
     
     if (UIDeviceOrientationIsPortrait([UIDevice currentDevice].orientation)){
         // code for Portrait orientation
-        viewBounds.origin.y += TOOLBAR_HEIGHT;
-        self.toolbar.frame = CGRectMake(self.toolbar.frame.origin.x, statusBarHeight, self.toolbar.frame.size.width, self.toolbar.frame.size.height);
+        viewBounds.origin.y += (TOOLBAR_HEIGHT - (NOTCH));
+        self.toolbar.frame = CGRectMake(self.toolbar.frame.origin.x, statusBarHeight, self.toolbar.frame.size.width, viewBounds.origin.y);
+        //self.toolbar.frame.size.height - NOTCH
+        if (!lastOrientationPortrait){
+            viewBounds.size.height = viewBounds.size.height - (TOOLBAR_HEIGHT - (NOTCH));
+        }
+        lastOrientationPortrait = TRUE;
     } else {
-        self.toolbar.frame = CGRectMake(self.toolbar.frame.origin.x, -100, self.toolbar.frame.size.width, self.toolbar.frame.size.height);
+        self.toolbar.frame = CGRectMake(self.toolbar.frame.origin.x, -100, self.toolbar.frame.size.width, self.toolbar.frame.size.height - NOTCH);
+        viewBounds.size.height = viewBounds.size.height + (TOOLBAR_HEIGHT);
+        lastOrientationPortrait = FALSE;
     }
     
     //}
